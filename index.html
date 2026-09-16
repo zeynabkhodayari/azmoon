@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>آزمون</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .quiz-container {
+      background: #fff;
+      width: 100%;
+      max-width: 700px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .quiz-header h2 { color: #333; font-size: 1.3rem; }
+
+    .progress-info {
+      background: #667eea;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .question-box { margin-bottom: 25px; }
+
+    .question-text {
+      font-size: 1.15rem;
+      color: #222;
+      margin-bottom: 15px;
+      line-height: 1.8;
+      font-weight: 600;
+    }
+
+    .question-image {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: block;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .options { display: flex; flex-direction: column; gap: 12px; }
+
+    .option-btn {
+      padding: 15px 20px;
+      border: 2px solid #e0e0e0;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: right;
+      transition: all 0.2s ease;
+      color: #333;
+    }
+
+    .option-btn:hover {
+      border-color: #667eea;
+      background: #f7f8ff;
+      transform: translateX(-4px);
+    }
+
+    .next-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .next-btn:hover:not(:disabled) { transform: scale(1.02); }
+    .next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .result-screen { text-align: center; padding: 20px; }
+
+    .result-screen h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .score-circle {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      text-align: center;
+      padding: 10px;
+    }
+
+    .result-message {
+      font-size: 1.2rem;
+      color: #555;
+      margin: 20px 0;
+    }
+
+    .restart-btn {
+      padding: 12px 40px;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .restart-btn:hover { background: #5568d3; }
+
+    .hidden { display: none; }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      text-align: right;
+      transition: border-color .2s;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .login-error {
+      color: #dc3545;
+      text-align: center;
+      margin-top: 15px;
+      display: none;
+    }
+.question-box, .options, .quiz-header {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.katex, .katex-display {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: left;
+}
+#timerEl {
+  font-weight: bold;
+  font-size: 0.95rem;
+  transition: color .3s;
+}
+
+#settingsModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 1000;
+}
+#settingsModal.hidden { display: none; }
+#addStudentModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 1000;
+}
+#addStudentModal.hidden { display: none; }
+#manageStudentsModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 1000;
+}
+#manageStudentsModal.hidden { display: none; }
+#changePassModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 1000;
+}
+#changePassModal.hidden { display: none; }
+
+#manageClassesModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 1000;
+}
+#manageClassesModal.hidden { display: none; }
+
+  </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+
+</head>
+<body>
+
+  <!-- صفحه ورود -->
+  <div class="quiz-container" id="loadingScreen" style="text-align:center;">
+  <p style="color:#667eea;font-weight:bold;">در حال بارگذاری...</p>
+</div>
+<div class="quiz-container hidden" id="loginScreen">
+    <h2 id="loginTitle" style="text-align:center;margin-bottom:10px;color:#333;"></h2>
+<p id="loginSubtitle" style="text-align:center;color:#777;margin-bottom:15px;font-size:0.95rem;"></p>
+<p id="loginDuration" style="text-align:center;color:#667eea;margin-bottom:20px;font-weight:bold;"></p>
+<p style="text-align:center;color:#333;font-weight:bold;margin-bottom:15px;">👨‍🏫 استاد : دکتر زینب خدایاری مطلق :</p>
+<p style="text-align:center;color:#dc3545;font-size:0.85rem;margin-bottom:15px;">
+  ⚠️ پس از ورود، صفحه را رفرش نکنید و از آزمون خارج نشوید. در غیر این صورت امکان ورود مجدد ندارید.
+</p>
+    <input id="usernameInput" class="login-input" type="text"
+           placeholder="کد کاربری " inputmode="numeric">
+    <input id="passwordInput" class="login-input" type="password"
+           placeholder="رمز عبور " inputmode="numeric">
+
+    <button id="loginBtn" class="next-btn" style="margin-top:20px;">ورود</button>
+<button id="adminBtn" style="margin-top:10px;width:100%;padding:10px;background:transparent;color:#888;border:1px solid #ddd;border-radius:12px;font-family:inherit;cursor:pointer;">🔒 مدیریت</button>
+    <p id="loginError" class="login-error"></p>
+  </div>
+<!-- صفحه مدیریت -->
+<div class="quiz-container hidden" id="adminScreen">
+  <h2 style="text-align:center;color:#333;margin-bottom:20px;">🔒 پنل مدیریت</h2>
+  
+<div id="adminMenuBtns">
+  <button id="showResultsBtn" class="next-btn">مشاهده نتایج</button>
+  <button id="settingsBtn" class="next-btn" style="margin-top:10px;">⚙️ تنظیمات آزمون</button>
+  <button id="addStudentBtn" class="next-btn" style="margin-top:10px;">➕ افزودن کاربر</button>
+<button id="manageStudentsBtn" class="next-btn" style="margin-top:10px;">👥 مدیریت دانش‌آموزان</button>
+<button id="manageClassesBtn" class="next-btn" style="margin-top:10px;">🏫 مدیریت کلاس‌ها</button>
+<button id="changePassBtn" class="next-btn" style="margin-top:10px;">🔑 تغییر رمز مدیریت</button>
+</div>
+
+
+  <div id="resultsBox" style="margin-top:20px;"></div>
+  <button id="backToAdminBtn" class="restart-btn hidden" style="margin-top:15px;width:100%;">بازگشت به مدیریت</button>
+<button id="copyResultsBtn" class="restart-btn hidden" style="margin-top:15px;width:100%;">📋 کپی نتایج</button>
+<button id="adminBackBtn" class="restart-btn" style="margin-top:15px;width:100%;">خروج از مدیریت</button>
+
+</div>
+  <!-- صفحه آزمون -->
+  <div class="quiz-container hidden" id="quizScreen">
+    <div class="quiz-header">
+  <h2>🧠 آزمون</h2>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="studentName" style="color:#555;font-size:0.95rem;"></span>
+    <span id="timerEl">⏱ ۳:۰۰</span>
+    <span class="progress-info" id="progressInfo">۱ از ۱</span>
+  </div>
+</div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-text" id="questionText"></div>
+      <img id="questionImage" class="question-image hidden" alt="تصویر سوال">
+    </div>
+
+    <div class="options" id="optionsContainer"></div>
+
+    <button class="next-btn" id="nextBtn" disabled>تایید</button>
+  </div>
+
+  <!-- صفحه نتیجه -->
+  <div id="resultScreen" class="quiz-container result-screen hidden">
+    <h1>🎉 پایان آزمون</h1>
+    <div class="score-circle" id="scoreCircle">0 از 20</div>
+    <p class="result-message" id="resultMessage"></p>
+    <button class="restart-btn" id="restartBtn">شروع دوباره</button>
+  </div>
+<!-- مودال تنظیمات -->
+<!-- مودال افزودن دانش‌آموز -->
+<!-- مودال افزودن دانش‌آموز -->
+<div id="addStudentModal" class="hidden">
+  <div style="background:#fff;border-radius:20px;padding:30px;width:100%;max-width:450px;">
+    <h3 style="margin-bottom:20px;color:#333;text-align:center;">➕ افزودن دانش‌آموز</h3>
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">نام:</label>
+    <input id="newName" class="login-input" type="text">
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">کد کاربری :</label>
+    <input id="newUsername" class="login-input" type="text" inputmode="numeric">
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">رمز عبور:</label>
+    <input id="newPassword" class="login-input" type="text">
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">کلاس:</label>
+    <input id="newClass" class="login-input" type="text">
+
+
+    <div style="display:flex;gap:10px;margin-top:15px;">
+      <button id="saveStudentBtn" class="next-btn" style="margin-top:0;">ذخیره</button>
+      <button id="cancelStudentBtn" class="restart-btn" style="flex:1;">انصراف</button>
+    </div>
+    <p id="addStudentMsg" style="text-align:center;margin-top:10px;font-size:0.9rem;"></p>
+  </div>
+</div>
+
+<!-- مودال مدیریت دانش‌آموزان -->
+<div id="manageStudentsModal" class="hidden">
+  <div style="background:#fff;border-radius:20px;padding:30px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto;">
+    <h3 style="margin-bottom:20px;color:#333;text-align:center;">👥 مدیریت دانش‌آموزان</h3>
+    <div id="studentsListBox"></div>
+
+<div style="display:flex;gap:8px;margin-top:12px;">
+  <button id="bulkResetBtn" class="next-btn" style="margin-top:0;background:#ffc107;color:#000;">پاک کردن نمرات انتخاب‌شده</button>
+  <button id="bulkDeleteBtn" class="next-btn" style="margin-top:0;background:#dc3545;">حذف دانش‌آموزان انتخاب‌شده</button>
+</div>
+    <button id="closeManageBtn" class="restart-btn" style="margin-top:15px;width:100%;">بستن</button>
+  </div>
+</div>
+
+
+<!-- مودال مدیریت کلاس‌ها -->
+<div id="manageClassesModal" class="hidden">
+  <div style="background:#fff;border-radius:20px;padding:30px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;">
+    <h3 style="margin-bottom:20px;color:#333;text-align:center;">🏫 مدیریت کلاس‌ها</h3>
+    <div id="classesListBox"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button id="deactivateClassesBtn" class="next-btn" style="margin-top:0;background:#dc3545;">غیرفعال کردن آزمون</button>
+      <button id="activateClassesBtn" class="next-btn" style="margin-top:0;background:#22c55e;">فعال کردن آزمون</button>
+    </div>
+    <button id="closeClassesBtn" class="restart-btn" style="margin-top:15px;width:100%;">بستن</button>
+  </div>
+</div>
+
+
+<!-- مودال تغییر رمز مدیریت -->
+<div id="changePassModal" class="hidden">
+  <div style="background:#fff;border-radius:20px;padding:30px;width:100%;max-width:450px;">
+    <h3 style="margin-bottom:20px;color:#333;text-align:center;">🔑 تغییر رمز مدیریت</h3>
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">رمز جدید:</label>
+    <input id="newAdminPass" class="login-input" type="text">
+
+    <div style="display:flex;gap:10px;margin-top:15px;">
+      <button id="savePassBtn" class="next-btn" style="margin-top:0;">ذخیره</button>
+      <button id="cancelPassBtn" class="restart-btn" style="flex:1;">انصراف</button>
+    </div>
+    <p id="changePassMsg" style="text-align:center;margin-top:10px;font-size:0.9rem;color:#667eea;"></p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<div id="settingsModal" class="hidden">
+  <div style="background:#fff;border-radius:20px;padding:30px;width:100%;max-width:450px;">
+    <h3 style="margin-bottom:20px;color:#333;text-align:center;">⚙️ تنظیمات آزمون</h3>
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">عنوان:</label>
+    <input id="setTitle" class="login-input" type="text">
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">زیرعنوان:</label>
+    <input id="setSubtitle" class="login-input" type="text">
+
+    <label style="display:block;margin-bottom:6px;color:#555;font-size:0.9rem;">زمان آزمون (دقیقه):</label>
+    <input id="setDuration" class="login-input" type="number" min="1">
+
+    <div style="display:flex;gap:10px;margin-top:15px;">
+      <button id="saveSettingsBtn" class="next-btn" style="margin-top:0;">ذخیره</button>
+      <button id="cancelSettingsBtn" class="restart-btn" style="flex:1;">انصراف</button>
+    </div>
+    <p id="settingsMsg" style="text-align:center;margin-top:10px;font-size:0.9rem;color:#667eea;"></p>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+  
+  <script>
+    // ====== آدرس Web App گوگل اسکریپت ======
+    const API_URL = 'https://my-first-worker3.miratari.workers.dev';
+
+    
+const adminScreen = document.getElementById('adminScreen');
+const showResultsBtn = document.getElementById('showResultsBtn');
+const resultsBox = document.getElementById('resultsBox');
+const adminBackBtn = document.getElementById('adminBackBtn');
+  const loginScreen = document.getElementById('loginScreen');
+  const usernameInput = document.getElementById('usernameInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+const adminMenuBtns = document.getElementById('adminMenuBtns');
+const backToAdminBtn = document.getElementById('backToAdminBtn');
+  const quizScreen = document.getElementById('quizScreen');
+  const resultScreen = document.getElementById('resultScreen');
+  const questionText = document.getElementById('questionText');
+  const questionImage = document.getElementById('questionImage');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const nextBtn = document.getElementById('nextBtn');
+  const progressInfo = document.getElementById('progressInfo');
+  const progressFill = document.getElementById('progressFill');
+  const scoreCircle = document.getElementById('scoreCircle');
+  const resultMessage = document.getElementById('resultMessage');
+  const restartBtn = document.getElementById('restartBtn');
+  const studentName = document.getElementById('studentName');
+  const timerEl = document.getElementById('timerEl');
+  const loginTitle = document.getElementById('loginTitle');
+  const loginSubtitle = document.getElementById('loginSubtitle');
+  const loginDuration = document.getElementById('loginDuration');
+  const adminBtn = document.getElementById('adminBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const setTitle = document.getElementById('setTitle');
+const setSubtitle = document.getElementById('setSubtitle');
+const setDuration = document.getElementById('setDuration');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+const settingsMsg = document.getElementById('settingsMsg');
+  const copyResultsBtn = document.getElementById('copyResultsBtn');
+const addStudentBtn = document.getElementById('addStudentBtn');
+const addStudentModal = document.getElementById('addStudentModal');
+const newName = document.getElementById('newName');
+const newUsername = document.getElementById('newUsername');
+const newPassword = document.getElementById('newPassword');
+const saveStudentBtn = document.getElementById('saveStudentBtn');
+const cancelStudentBtn = document.getElementById('cancelStudentBtn');
+const addStudentMsg = document.getElementById('addStudentMsg');
+const manageStudentsBtn = document.getElementById('manageStudentsBtn');
+const manageStudentsModal = document.getElementById('manageStudentsModal');
+const studentsListBox = document.getElementById('studentsListBox');
+const closeManageBtn = document.getElementById('closeManageBtn');
+const bulkResetBtn = document.getElementById('bulkResetBtn');
+const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+const changePassBtn = document.getElementById('changePassBtn');
+const changePassModal = document.getElementById('changePassModal');
+const newAdminPass = document.getElementById('newAdminPass');
+const savePassBtn = document.getElementById('savePassBtn');
+const cancelPassBtn = document.getElementById('cancelPassBtn');
+const changePassMsg = document.getElementById('changePassMsg');
+const newClass = document.getElementById('newClass');
+const manageClassesBtn = document.getElementById('manageClassesBtn');
+const manageClassesModal = document.getElementById('manageClassesModal');
+const classesListBox = document.getElementById('classesListBox');
+const deactivateClassesBtn = document.getElementById('deactivateClassesBtn');
+const activateClassesBtn = document.getElementById('activateClassesBtn');
+const closeClassesBtn = document.getElementById('closeClassesBtn');
+
+  let adminPassword = '';
+  let currentIndex = 0;
+  let score = 0;
+  let selectedIndex = null;
+  let questions = [];
+  let currentUsername = '';
+  let timerInterval = null;
+  const QUESTION_TIME = 180;
+  let timeLeft = QUESTION_TIME;
+  let durationMinutes = 10;
+
+  const toPersianNum = (n) => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+let katexLoaded = false;
+function loadKatex() {
+  return new Promise((resolve) => {
+    if (katexLoaded || window.katex) { katexLoaded = true; resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
+    s.onload = () => { katexLoaded = true; resolve(); };
+    s.onerror = () => resolve();
+    document.head.appendChild(s);
+  });
+}
+
+function renderMath(text) {
+  if (!window.katex) return text;
+  return text.replace(/\$([^$]+)\$/g, (m, tex) => {
+    try { return katex.renderToString(tex, { throwOnError: false }); }
+    catch { return m; }
+  });
+}
+
+function hasMath(text) {
+  return /\$[^$]+\$/.test(text || '');
+}
+
+
+// بارگذاری اطلاعات اولیه صفحه ورود
+fetch(API_URL + '?settings=1&t=' + Date.now())
+  .then(res => res.json())
+  .then(payload => {
+    loginTitle.textContent = payload.title || '';
+    loginSubtitle.textContent = payload.subtitle || '';
+    loginDuration.textContent = '⏱ زمان آزمون: ' + toPersianNum(payload.duration) + ' دقیقه';
+    
+    document.getElementById('loadingScreen').classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+  })
+  .catch(() => {
+    document.getElementById('loadingScreen').innerHTML =
+      '<p style="color:#dc3545;text-align:center;">خطا در ارتباط با سرور</p>';
+  });
+  // ====== ضد تقلب ======
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('cut', e => e.preventDefault());
+  document.addEventListener('selectstart', e => {
+  if (!e.target || !e.target.closest || !e.target.closest('input')) {
+    e.preventDefault();
+  }
+});
+
+  // ====== ابزار ======
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function prepareQuestions() {
+    const list = shuffle([...questionsArray]);
+    return list.map(q => {
+      const idx = q.options.map((_, i) => i);
+      shuffle(idx);
+      return {
+        question: q.question,
+        image: q.image,
+        options: idx.map(i => q.options[i]),
+        correctAnswer: idx.indexOf(q.correctAnswer)
+      };
+    });
+  }
+async function registerStart(username) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ username: username, action: 'start' })
+    });
+  } catch (e) {
+    console.warn('registerStart:', e);
+  }
+}
+  // ====== ورود ======
+  loginBtn.addEventListener('click', async () => {
+    loginError.style.display = 'none';
+    const u = usernameInput.value.trim();
+    const p = passwordInput.value.trim();
+
+    if (!u || !p) {
+      loginError.textContent = 'کد کاربری و رمز عبور را وارد کنید.';
+      loginError.style.display = 'block';
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'در حال بررسی...';
+
+    let students = [];
+    try {
+      const res = await fetch(API_URL + '?t=' + Date.now());
+      const payload = await res.json();
+       students = payload.students;
+durationMinutes = payload.duration;
+
+    } catch {
+      loginError.textContent = 'خطا در ارتباط با سرور.';
+      loginError.style.display = 'block';
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'ورود';
+      return;
+    }
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'ورود';
+
+    const student = students.find(s => s.username === u && s.password === p);
+    if (!student) {
+      loginError.textContent = 'کد کاربری و رمز عبور اشتباه است.';
+      loginError.style.display = 'block';
+      return;
+    }
+
+    if (student.score !== '') {
+      loginError.textContent = 'شما قبلاً در این آزمون شرکت کرده‌اید.';
+      loginError.style.display = 'block';
+      return;
+    }
+
+       currentUsername = u;
+    studentName.textContent = '👤 ' + student.name;
+
+        loginScreen.classList.add('hidden');
+    startQuiz();
+    registerStart(u);   // در پس‌زمینه
+  });
+
+  // ====== آزمون ======
+ async function startQuiz() {
+  questions = prepareQuestions();
+  currentIndex = 0;
+  score = 0;
+  timeLeft = durationMinutes * 60;
+
+  const needsMath = questions.some(q =>
+    hasMath(q.question) || q.options.some(o => hasMath(o))
+  );
+  if (needsMath) await loadKatex();
+
+  quizScreen.classList.remove('hidden');
+  resultScreen.classList.add('hidden');
+  showQuestion();
+  startTotalTimer();
+}
+
+  function showQuestion() {
+    selectedIndex = null;
+    const q = questions[currentIndex];
+
+            questionText.innerHTML = renderMath(q.question || '');
+    questionText.style.whiteSpace = 'pre-wrap';
+
+    if (q.image) {
+      questionImage.src = q.image;
+      questionImage.classList.remove('hidden');
+    } else {
+      questionImage.classList.add('hidden');
+      questionImage.removeAttribute('src');
+    }
+
+    optionsContainer.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+            btn.innerHTML = renderMath(opt);
+      btn.addEventListener('click', () => selectOption(i, btn));
+      optionsContainer.appendChild(btn);
+    });
+
+    progressFill.style.width = (currentIndex / questions.length) * 100 + '%';
+    progressInfo.textContent = `${toPersianNum(currentIndex + 1)} از ${toPersianNum(questions.length)}`;
+
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'تایید';
+
+    
+  }
+
+  function selectOption(i, btn) {
+    selectedIndex = i;
+    optionsContainer.querySelectorAll('.option-btn').forEach(b => {
+      b.style.borderColor = '#e0e0e0';
+      b.style.background = '#fff';
+    });
+    btn.style.borderColor = '#667eea';
+    btn.style.background = '#f7f8ff';
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.addEventListener('click', () => {
+  if (selectedIndex === null) return;
+  finishQuestion();
+});
+
+ function finishQuestion() {
+  if (selectedIndex === questions[currentIndex].correctAnswer) {
+    score++;
+  }
+  currentIndex++;
+  if (currentIndex < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+  function startTotalTimer() {
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      showResult();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  timerEl.textContent = '⏱ ' + toPersianNum(m) + ':' +
+    toPersianNum(String(s).padStart(2, '0'));
+  timerEl.style.color = timeLeft <= 60 ? '#dc3545' : '#667eea';
+}
+
+  // ====== نتیجه ======
+  function showResult() {
+    clearInterval(timerInterval);
+    quizScreen.classList.add('hidden');
+    resultScreen.classList.remove('hidden');
+
+    const outOf20 = ((score / questions.length) * 20).toFixed(2).replace(/\.?0+$/, '');
+    scoreCircle.textContent = toPersianNum(outOf20) + ' از ۲۰';
+    resultMessage.textContent =
+      `تعداد پاسخ‌های صحیح: ${toPersianNum(score)} از ${toPersianNum(questions.length)}`;
+
+       fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        username: currentUsername,
+        score20: Number(outOf20),
+        action: 'finish'
+      })
+    }).catch(() => {});
+  }
+adminBtn.addEventListener('click', async () => {
+  const input = prompt('رمز مدیریت را وارد کنید:');
+  if (input === null) return;
+
+  try {
+       const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminGetSettings', password: input.trim() })
+    });
+    const data = await res.json();
+       if (data.ok) {
+      adminPassword = input.trim();
+      loginScreen.classList.add('hidden');
+      adminScreen.classList.remove('hidden');
+adminBackBtn.classList.remove('hidden');
+      resultsBox.innerHTML = '';
+    } else {
+      alert('رمز اشتباه یا خطای سرور: ' + JSON.stringify(data));
+      console.log('Admin response:', data);
+    }
+    } catch (err) {
+    alert('خطا: ' + err.message);
+    console.error(err);
+  }
+});
+showResultsBtn.addEventListener('click', async () => {
+  showResultsBtn.disabled = true;
+  showResultsBtn.textContent = 'در حال بارگذاری...';
+  resultsBox.innerHTML = '';
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin', password: adminPassword })
+    });
+    const data = await res.json();
+if (data.ok && data.results) {
+      window.lastResults = data.results;
+    }
+    if (!data.ok) {
+      resultsBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در احراز هویت.</p>';
+    } else {
+      if (data.results.length === 0) {
+        resultsBox.innerHTML = '<p style="text-align:center;color:#888;">هنوز هیچ نتیجه‌ای ثبت نشده است.</p>';
+      } else {
+        let html = '<table style="width:100%;border-collapse:collapse;font-size:0.95rem;">';
+        html += '<tr style="background:#f0f0f0;"><th style="padding:10px;text-align:right;">ردیف</th><th style="padding:10px;text-align:right;">نام</th><th style="padding:10px;text-align:center;">کد</th><th style="padding:10px;text-align:center;">نمره</th></tr>';
+        data.results.forEach((r, i) => {
+          html += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px;">${toPersianNum(i + 1)}</td>
+            <td style="padding:10px;">${r.name}</td>
+            <td style="padding:10px;text-align:center;">${toPersianNum(r.last4)}</td>
+            <td style="padding:10px;text-align:center;font-weight:bold;">${toPersianNum(r.score)}</td>
+          </tr>`;
+        });
+             html += '</table>';
+        resultsBox.innerHTML = html;
+      }
+      backToAdminBtn.classList.remove('hidden');
+      copyResultsBtn.classList.remove('hidden');
+      adminMenuBtns.classList.add('hidden');
+adminBackBtn.classList.add('hidden');
+    }
+  } catch {
+    resultsBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در ارتباط با سرور.</p>';
+  }
+
+  showResultsBtn.disabled = false;
+  showResultsBtn.textContent = 'مشاهده نتایج';
+});
+
+adminBackBtn.addEventListener('click', () => {
+  adminScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  resultsBox.innerHTML = '';
+backToAdminBtn.classList.add('hidden');
+  adminMenuBtns.classList.remove('hidden');
+ adminBackBtn.classList.remove('hidden');
+  manageStudentsModal.classList.add('hidden');
+
+});
+settingsBtn.addEventListener('click', async () => {
+  settingsMsg.textContent = '';
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminGetSettings', password: adminPassword })
+    });
+    const data = await res.json();
+    if (!data.ok) { settingsMsg.textContent = 'خطا در دریافت تنظیمات.'; return; }
+    setTitle.value = data.title || '';
+    setSubtitle.value = data.subtitle || '';
+    setDuration.value = data.duration || 10;
+    settingsModal.classList.remove('hidden');
+  } catch { settingsMsg.textContent = 'خطای ارتباط.'; }
+});
+
+cancelSettingsBtn.addEventListener('click', () => {
+  settingsModal.classList.add('hidden');
+});
+saveSettingsBtn.addEventListener('click', async () => {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+     
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'adminSaveSettings',
+        password: adminPassword,
+        title: setTitle.value.trim(),
+        subtitle: setSubtitle.value.trim(),
+        duration: Number(setDuration.value) || 10
+      })
+    });
+
+    // بروزرسانی فوری صفحه ورود
+    loginTitle.textContent = setTitle.value.trim();
+    loginSubtitle.textContent = setSubtitle.value.trim();
+    loginDuration.textContent = '⏱ زمان آزمون: ' + toPersianNum(Number(setDuration.value)) + ' دقیقه';
+    durationMinutes = Number(setDuration.value) || 10;
+
+    settingsModal.classList.add('hidden');
+  } catch {
+    alert('خطا در ارتباط با سرور.');
+  }
+});
+
+
+
+
+backToAdminBtn.addEventListener('click', () => {
+  resultsBox.innerHTML = '';
+  backToAdminBtn.classList.add('hidden');
+  adminMenuBtns.classList.remove('hidden');
+  copyResultsBtn.classList.add('hidden');
+adminBackBtn.classList.remove('hidden');
+});
+copyResultsBtn.addEventListener('click', async () => {
+  if (!window.lastResults) return;
+
+  let text = '📊 نتایج آزمون\n\n';
+  window.lastResults.forEach((r, i) => {
+    text += `${i + 1}. ${r.name} | کد: ${r.last4} | نمره: ${r.score}\n`;
+  });
+
+  try {
+    await navigator.clipboard.writeText(text);
+    copyResultsBtn.textContent = '✅ کپی شد';
+    setTimeout(() => copyResultsBtn.textContent = '📋 کپی نتایج', 1500);
+  } catch {
+    // روش جایگزین برای مرورگرهای قدیمی
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    copyResultsBtn.textContent = '✅ کپی شد';
+    setTimeout(() => copyResultsBtn.textContent = '📋 کپی نتایج', 1500);
+  }
+});
+addStudentBtn.addEventListener('click', () => {
+  newName.value = '';
+  newUsername.value = '';
+  newPassword.value = '';
+  newClass.value = '';
+  addStudentMsg.textContent = '';
+  addStudentModal.classList.remove('hidden');
+});
+
+cancelStudentBtn.addEventListener('click', () => {
+  addStudentModal.classList.add('hidden');
+});
+
+saveStudentBtn.addEventListener('click', async () => {
+  const name = newName.value.trim();
+  const username = newUsername.value.trim();
+  const studentPass = newPassword.value.trim();
+  const studentClass = newClass.value.trim();
+
+  if (!name || !username || !studentPass) {
+    addStudentMsg.style.color = '#dc3545';
+    addStudentMsg.textContent = 'همه‌ی فیلدها را پر کنید.';
+    return;
+  }
+
+  saveStudentBtn.disabled = true;
+  addStudentMsg.style.color = '#667eea';
+  addStudentMsg.textContent = 'در حال ذخیره...';
+  fetch(API_URL, {
+    method: 'POST',
+    
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'adminAddStudent',
+      password: adminPassword,
+      name: name,
+      username: username,
+      studentPassword: studentPass,
+       studentClass: studentClass
+    })
+  }).catch(() => {});
+
+  saveStudentBtn.disabled = false;
+  addStudentMsg.style.color = '#28a745';
+  addStudentMsg.textContent = 'ذخیره شد ✅';
+  setTimeout(() => addStudentModal.classList.add('hidden'), 800);
+});
+
+
+
+// ====== مدیریت دانش‌آموزان ======
+manageStudentsBtn.addEventListener('click', async () => {
+  studentsListBox.innerHTML = '<p style="text-align:center;color:#888;">در حال بارگذاری...</p>';
+  manageStudentsModal.classList.remove('hidden');
+  await loadStudentsList();
+});
+
+closeManageBtn.addEventListener('click', () => {
+  manageStudentsModal.classList.add('hidden');
+});
+
+async function loadStudentsList() {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminListStudents', password: adminPassword })
+    });
+    const data = await res.json();
+data.students.sort((a, b) => (a.className || '').localeCompare(b.className || '', 'fa'));
+    if (!data.ok) {
+      studentsListBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در دریافت لیست.</p>';
+      return;
+    }
+
+    if (data.students.length === 0) {
+      studentsListBox.innerHTML = '<p style="text-align:center;color:#888;">هیچ دانش‌آموزی ثبت نشده است.</p>';
+      return;
+    }
+
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">';
+    html += '<tr style="background:#f0f0f0;">';
+    html += '<th style="padding:8px;text-align:center;"><input type="checkbox" id="selectAllStudents"></th>';
+    html += '<th style="padding:8px;text-align:right;">نام</th>';
+    html += '<th style="padding:8px;text-align:center;">کد</th>';
+    html += '<th style="padding:8px;text-align:center;">کلاس</th>';
+    html += '<th style="padding:8px;text-align:center;">نمره</th>';
+    html += '</tr>';
+
+    data.students.forEach(s => {
+      const safeName = s.name.replace(/</g, '&lt;');
+      const safeUsernameAttr = s.username.replace(/"/g, '&quot;');
+      html += `<tr style="border-bottom:1px solid #eee;">
+        <td style="padding:8px;text-align:center;">
+          <input type="checkbox" class="student-checkbox" value="${safeUsernameAttr}">
+        </td>
+        <td style="padding:8px;">${safeName}</td>
+        <td style="padding:8px;text-align:center;">${toPersianNum(s.username)}</td>
+        <td style="padding:8px;text-align:center;">${s.className || '—'}</td>
+        <td style="padding:8px;text-align:center;font-weight:bold;">${s.score === '' ? '—' : toPersianNum(s.score)}</td>
+      </tr>`;
+    });
+
+    html += '</table>';
+    studentsListBox.innerHTML = html;
+
+    const selectAll = document.getElementById('selectAllStudents');
+    if (selectAll) {
+      selectAll.addEventListener('change', () => {
+        document.querySelectorAll('.student-checkbox').forEach(cb => {
+          cb.checked = selectAll.checked;
+        });
+      });
+    }
+  } catch {
+    studentsListBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در ارتباط با سرور.</p>';
+  }
+}
+
+function renderMath(text) {
+  if (!window.katex) return text;
+  return text.replace(/\$([^$]+)\$/g, (m, tex) => {
+    try { return katex.renderToString(tex, { throwOnError: false }); }
+    catch { return m; }
+  });
+}
+
+
+function getSelectedUsernames() {
+  const cbs = document.querySelectorAll('.student-checkbox:checked');
+  return Array.from(cbs).map(cb => cb.value);
+}
+
+bulkResetBtn.addEventListener('click', async () => {
+  const targets = getSelectedUsernames();
+  if (targets.length === 0) {
+    alert('هیچ دانش‌آموزی انتخاب نشده است.');
+    return;
+  }
+  if (!confirm(`نمره‌ی ${targets.length} دانش‌آموز پاک شود؟`)) return;
+
+  fetch(API_URL, {
+    method: 'POST',
+    
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'adminBulkResetScores',
+      password: adminPassword,
+      targets: targets
+    })
+  }).catch(() => {});
+
+  alert(`${targets.length} نمره در حال پاک شدن است ✅\nبرای دیدن تغییرات، مودال را ببند و دوباره باز کن.`);
+});
+
+bulkDeleteBtn.addEventListener('click', async () => {
+  const targets = getSelectedUsernames();
+  if (targets.length === 0) {
+    alert('هیچ دانش‌آموزی انتخاب نشده است.');
+    return;
+  }
+  if (!confirm(`${targets.length} دانش‌آموز کاملاً حذف شوند؟ این کار برگشت‌پذیر نیست.`)) return;
+
+  fetch(API_URL, {
+    method: 'POST',
+    
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'adminBulkDeleteStudents',
+      password: adminPassword,
+      targets: targets
+    })
+  }).catch(() => {});
+
+  alert(`${targets.length} دانش‌آموز در حال حذف است ✅\nبرای دیدن تغییرات، مودال را ببند و دوباره باز کن.`);
+});
+
+
+
+changePassBtn.addEventListener('click', () => {
+  newAdminPass.value = '';
+  changePassMsg.textContent = '';
+  changePassModal.classList.remove('hidden');
+});
+
+cancelPassBtn.addEventListener('click', () => {
+  changePassModal.classList.add('hidden');
+});
+
+savePassBtn.addEventListener('click', async () => {
+  const newPass = newAdminPass.value.trim();
+  if (!newPass) {
+    changePassMsg.style.color = '#dc3545';
+    changePassMsg.textContent = 'رمز جدید را وارد کنید.';
+    return;
+  }
+
+  savePassBtn.disabled = true;
+  changePassMsg.style.color = '#667eea';
+  changePassMsg.textContent = 'در حال ذخیره...';
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'adminChangePassword',
+        password: adminPassword,
+        newPassword: newPass
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      adminPassword = newPass;
+      changePassMsg.style.color = '#28a745';
+      changePassMsg.textContent = 'ذخیره شد ✅';
+      setTimeout(() => changePassModal.classList.add('hidden'), 1000);
+    } else {
+      changePassMsg.style.color = '#dc3545';
+      changePassMsg.textContent = 'خطا در ذخیره.';
+    }
+  } catch {
+    changePassMsg.style.color = '#dc3545';
+    changePassMsg.textContent = 'خطا در ارتباط با سرور.';
+  }
+
+  savePassBtn.disabled = false;
+});
+
+
+// ====== مدیریت کلاس‌ها ======
+manageClassesBtn.addEventListener('click', async () => {
+  classesListBox.innerHTML = '<p style="text-align:center;color:#888;">در حال بارگذاری...</p>';
+  manageClassesModal.classList.remove('hidden');
+  await loadClassesList();
+});
+
+closeClassesBtn.addEventListener('click', () => {
+  manageClassesModal.classList.add('hidden');
+});
+
+async function loadClassesList() {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'adminListClasses', password: adminPassword })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      classesListBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در دریافت لیست.</p>';
+      return;
+    }
+
+    if (data.classes.length === 0) {
+      classesListBox.innerHTML = '<p style="text-align:center;color:#888;">هیچ کلاسی ثبت نشده است.</p>';
+      return;
+    }
+
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:0.9rem;">';
+    html += '<tr style="background:#f0f0f0;">';
+    html += '<th style="padding:8px;text-align:center;"><input type="checkbox" id="selectAllClasses"></th>';
+    html += '<th style="padding:8px;text-align:right;">نام کلاس</th>';
+    html += '<th style="padding:8px;text-align:center;">تعداد دانش‌آموز</th>';
+    html += '</tr>';
+
+    data.classes.forEach(c => {
+      const safeNameAttr = c.name.replace(/"/g, '&quot;');
+      html += `<tr style="border-bottom:1px solid #eee;">
+        <td style="padding:8px;text-align:center;">
+          <input type="checkbox" class="class-checkbox" value="${safeNameAttr}">
+        </td>
+        <td style="padding:8px;">${c.name}</td>
+        <td style="padding:8px;text-align:center;">${toPersianNum(c.count)}</td>
+      </tr>`;
+    });
+
+    html += '</table>';
+    classesListBox.innerHTML = html;
+
+    const selectAll = document.getElementById('selectAllClasses');
+    if (selectAll) {
+      selectAll.addEventListener('change', () => {
+        document.querySelectorAll('.class-checkbox').forEach(cb => {
+          cb.checked = selectAll.checked;
+        });
+      });
+    }
+  } catch {
+    classesListBox.innerHTML = '<p style="color:#dc3545;text-align:center;">خطا در ارتباط با سرور.</p>';
+  }
+}
+
+function getSelectedClasses() {
+  const cbs = document.querySelectorAll('.class-checkbox:checked');
+  return Array.from(cbs).map(cb => cb.value);
+}
+
+deactivateClassesBtn.addEventListener('click', async () => {
+  const targets = getSelectedClasses();
+  if (targets.length === 0) {
+    alert('هیچ کلاسی انتخاب نشده است.');
+    return;
+  }
+  if (!confirm(`${targets.length} کلاس غیرفعال شود؟ دانش‌آموزان این کلاس‌ها دیگر نمی‌توانند وارد آزمون شوند.`)) return;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'adminDeactivateClasses',
+        password: adminPassword,
+        classes: targets
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert(`${data.count} دانش‌آموز غیرفعال شد ✅`);
+    } else {
+      alert('خطا در غیرفعال کردن.');
+    }
+  } catch {
+    alert('خطا در ارتباط با سرور.');
+  }
+});
+
+activateClassesBtn.addEventListener('click', async () => {
+  const targets = getSelectedClasses();
+  if (targets.length === 0) {
+    alert('هیچ کلاسی انتخاب نشده است.');
+    return;
+  }
+  if (!confirm(`${targets.length} کلاس فعال شود؟ نمرات دانش‌آموزان این کلاس‌ها پاک می‌شود و می‌توانند دوباره در آزمون شرکت کنند.`)) return;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'adminActivateClasses',
+        password: adminPassword,
+        classes: targets
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert(`${data.count} دانش‌آموز فعال شد ✅`);
+    } else {
+      alert('خطا در فعال کردن.');
+    }
+  } catch {
+    alert('خطا در ارتباط با سرور.');
+  }
+});
+
+
+
+
+  restartBtn.addEventListener('click', () => location.reload());
+</script>
+
+</body>
+</html>
